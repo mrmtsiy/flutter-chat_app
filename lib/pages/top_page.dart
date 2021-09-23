@@ -1,6 +1,9 @@
-import 'package:chat_app/model/user.dart';
+import 'package:chat_app/model/talk_room.dart';
 import 'package:chat_app/pages/settings_profile.dart';
 import 'package:chat_app/pages/talk_room.dart';
+import 'package:chat_app/utils/firebase.dart';
+import 'package:chat_app/utils/shared_prefs.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 class TopPage extends StatefulWidget {
@@ -9,88 +12,92 @@ class TopPage extends StatefulWidget {
 }
 
 class _TopPageState extends State<TopPage> {
-  List<User> userList = [
-    User(
-      name: 'ルフィ',
-      uid: 'abc',
-      imagePath:
-          'https://yt3.ggpht.com/ytc/AKedOLRBntMXxB8M_HgM3uxtQ9256MlF8y4cX-OvfzjUng=s900-c-k-c0x00ffffff-no-rj',
-      lastMessage: '海賊王に俺はなる',
-    ),
-    User(
-      name: 'サンジ',
-      uid: 'def',
-      imagePath:
-          'https://stickershop.line-scdn.net/stickershop/v1/product/15056934/LINEStorePC/main.png;compress=true',
-      lastMessage: 'レディーには手は出さん',
-    ),
-    User(
-      name: 'ゾロ',
-      uid: 'ghi',
-      imagePath: 'https://pbs.twimg.com/media/EJDt6a9UEAAyFnr.jpg',
-      lastMessage: '背中の傷は剣士の恥だ',
-    )
-  ];
+  List<TalkRoom>? talkUserList = [];
+
+  Future<void> createRooms() async {
+    String? myUid = SharedPrefs.getUid();
+    talkUserList = await Firestore.getRooms(myUid!);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: Text('チャットアプリ'),
-          actions: [
-            IconButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => SettingsProfilePage(),
-                    ),
-                  );
-                },
-                icon: Icon(Icons.settings))
-          ],
-        ),
-        body: ListView.builder(
-            itemCount: userList.length,
-            itemBuilder: (context, index) {
-              return InkWell(
-                onTap: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => TalkRoom(userList[index].name!,
-                              userList[index].imagePath!)));
-                },
-                child: Container(
-                  height: 70,
-                  child: Row(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                        child: CircleAvatar(
-                          backgroundImage:
-                              NetworkImage(userList[index].imagePath!),
-                          radius: 30,
-                        ),
-                      ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            userList[index].name!,
-                            style: TextStyle(
-                                fontSize: 18, fontWeight: FontWeight.bold),
-                          ),
-                          Text(
-                            userList[index].lastMessage!,
-                            style: TextStyle(color: Colors.grey),
-                          )
-                        ],
-                      )
-                    ],
+      appBar: AppBar(
+        title: Text('チャットアプリ'),
+        actions: [
+          IconButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => SettingsProfilePage(),
                   ),
-                ),
-              );
-            }));
+                );
+              },
+              icon: Icon(Icons.settings))
+        ],
+      ),
+      body: StreamBuilder<QuerySnapshot>(
+          stream: Firestore.roomSnapshot,
+          builder: (context, snapshot) {
+            return FutureBuilder(
+              future: createRooms(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.done) {
+                  return ListView.builder(
+                    itemCount: talkUserList!.length,
+                    itemBuilder: (context, index) {
+                      return InkWell(
+                        onTap: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) =>
+                                      TalkRoomPage(talkUserList![index])));
+                        },
+                        child: Container(
+                          height: 70,
+                          child: Row(
+                            children: [
+                              Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 8.0),
+                                child: CircleAvatar(
+                                  backgroundImage: NetworkImage(
+                                      talkUserList![index]
+                                          .talkUser!
+                                          .imagePath!),
+                                  radius: 30,
+                                ),
+                              ),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    talkUserList![index].talkUser!.name!,
+                                    style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                  Text(
+                                    'userList[index].lastMessage!',
+                                    style: TextStyle(color: Colors.grey),
+                                  )
+                                ],
+                              )
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                } else {
+                  return Center(child: CircularProgressIndicator());
+                }
+              },
+            );
+          }),
+    );
   }
 }
