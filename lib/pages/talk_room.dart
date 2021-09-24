@@ -120,13 +120,14 @@ class _TalkRoomPageState extends State<TalkRoomPage> {
                     ),
                   )),
                   IconButton(
-                      onPressed: () {
+                      onPressed: () async {
                         print('送信');
                         if (controller.text.isNotEmpty) {
                           final String? myUid = SharedPrefs.getUid();
-                          Firestore.sendMessage(
+                          await Firestore.sendMessage(
                               widget.room!.roomId!, controller.text);
                           Firestore.getProfile(myUid!);
+                          controller.clear();
                         }
                       },
                       icon: Icon(Icons.send))
