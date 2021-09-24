@@ -77,14 +77,13 @@ class Firestore {
         });
         User? yourProfile = await getProfile(yourUid!);
         TalkRoom room = TalkRoom(
-          roomId: doc.id,
-          talkUser: yourProfile,
-          lastMessage: doc.data()['lastMessage'] ?? '',
-        );
+            roomId: doc.id,
+            talkUser: yourProfile,
+            lastMessage: doc.data()['last_message'] ?? '',
+            lastMessageTime: doc.data()['updated_time']);
         roomList.add(room);
       }
     });
-    print(roomList.length);
 
     return roomList;
   }
@@ -115,8 +114,16 @@ class Firestore {
   static Future<void> sendMessage(String roomId, String message) async {
     final messageRef = roomRef.doc(roomId).collection('message');
     String? myUid = SharedPrefs.getUid();
-    await messageRef.add(
-        {'message': message, 'send_id': myUid, 'send_time': Timestamp.now()});
+    await messageRef.add({
+      'message': message,
+      'send_id': myUid,
+      'send_time': Timestamp.now(),
+    });
+
+    roomRef.doc(roomId).update({
+      'last_message': message,
+      'updated_time': Timestamp.now(),
+    });
   }
 
   static Stream<QuerySnapshot>? messageSnapshot(String roomId) {

@@ -5,6 +5,7 @@ import 'package:chat_app/utils/firebase.dart';
 import 'package:chat_app/utils/shared_prefs.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart' as intl;
 
 class TopPage extends StatefulWidget {
   @override
@@ -23,7 +24,7 @@ class _TopPageState extends State<TopPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('チャットアプリ'),
+        title: Text('トークリスト'),
         actions: [
           IconButton(
               onPressed: () {
@@ -47,6 +48,8 @@ class _TopPageState extends State<TopPage> {
                   return ListView.builder(
                     itemCount: talkUserList!.length,
                     itemBuilder: (context, index) {
+                      DateTime lastMessageTime =
+                          talkUserList![index].lastMessageTime!.toDate();
                       return InkWell(
                         onTap: () {
                           Navigator.push(
@@ -74,18 +77,26 @@ class _TopPageState extends State<TopPage> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Text(
-                                    talkUserList![index].talkUser!.name!,
-                                    style: TextStyle(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold),
+                                  Container(
+                                    width: 200,
+                                    child: Text(
+                                      talkUserList![index].talkUser!.name!,
+                                      style: TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold),
+                                    ),
                                   ),
                                   Text(
-                                    'userList[index].lastMessage!',
+                                    talkUserList![index].lastMessage!,
                                     style: TextStyle(color: Colors.grey),
                                   )
                                 ],
-                              )
+                              ),
+                              SizedBox(
+                                width: 80,
+                              ),
+                              Text(intl.DateFormat('HH:mm')
+                                  .format(lastMessageTime))
                             ],
                           ),
                         ),
