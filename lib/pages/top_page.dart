@@ -24,7 +24,7 @@ class _TopPageState extends State<TopPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('チャットアプリ'),
+        title: Text('トークリスト'),
         actions: [
           IconButton(
               onPressed: () {
