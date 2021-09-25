@@ -63,6 +63,14 @@ class Firestore {
     return myProfile;
   }
 
+  static Future<void> updateProfile(User newProfile) async {
+    String? myUid = SharedPrefs.getUid();
+    userRef.doc(myUid).update({
+      'name': newProfile.name,
+      'image_path': newProfile.imagePath,
+    });
+  }
+
   static Future<List<TalkRoom>?> getRooms(String myUid) async {
     final snapshot = await roomRef.get();
     List<TalkRoom>? roomList = [];
