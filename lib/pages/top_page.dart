@@ -50,6 +50,26 @@ class _TopPageState extends State<TopPage> {
                     itemBuilder: (context, index) {
                       DateTime lastMessageTime =
                           talkUserList![index].lastMessageTime!.toDate();
+                      //表示時間
+                      String fromAtNow(DateTime date) {
+                        final Duration difference =
+                            DateTime.now().difference(date);
+                        final int sec = difference.inSeconds;
+
+                        if (sec >= 60 * 60 * 24 * 2) {
+                          return intl.DateFormat('MM/dd')
+                              .format(lastMessageTime);
+                        } else if (sec >= 60 * 60 * 24) {
+                          return '昨日';
+                        } else if (sec >= 60 * 60) {
+                          return '${difference.inHours.toString()}時間前';
+                        } else if (sec >= 60) {
+                          return '${difference.inMinutes.toString()}分前';
+                        } else {
+                          return '$sec秒前';
+                        }
+                      }
+
                       return InkWell(
                         onTap: () {
                           Navigator.push(
@@ -63,8 +83,8 @@ class _TopPageState extends State<TopPage> {
                           child: Row(
                             children: [
                               Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 8.0),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 12.0),
                                 child: CircleAvatar(
                                   backgroundImage: NetworkImage(
                                       talkUserList![index]
@@ -93,10 +113,15 @@ class _TopPageState extends State<TopPage> {
                                 ],
                               ),
                               SizedBox(
-                                width: 80,
+                                width: 60,
                               ),
-                              Text(intl.DateFormat('HH:mm')
-                                  .format(lastMessageTime))
+                              Container(
+                                  width: 60,
+                                  alignment: Alignment.center,
+                                  child: Text(
+                                    fromAtNow(lastMessageTime),
+                                    style: TextStyle(color: Colors.grey),
+                                  ))
                             ],
                           ),
                         ),
