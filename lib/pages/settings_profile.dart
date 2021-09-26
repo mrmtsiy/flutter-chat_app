@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:chat_app/model/user.dart';
 import 'package:chat_app/utils/firebase.dart';
+import 'package:chat_app/utils/auth.dart';
 import 'package:chat_app/utils/shared_prefs.dart';
 
 import 'package:firebase_storage/firebase_storage.dart';
@@ -18,7 +19,7 @@ class _SettingsProfilePageState extends State<SettingsProfilePage> {
   ImagePicker picker = ImagePicker();
   String? imagePath;
   TextEditingController controller = TextEditingController();
-  String? myUid = SharedPrefs.getUid();
+  User? currentuser;
 
   Future<void> getImageFromGallery() async {
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
@@ -43,92 +44,98 @@ class _SettingsProfilePageState extends State<SettingsProfilePage> {
 
   @override
   Widget build(BuildContext context) {
+    String? myUid = SharedPrefs.getUid();
+
     return Scaffold(
       appBar: AppBar(
         title: Text('プロフィール画面'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(20.0),
-        child: Column(
-          children: [
-            SizedBox(
-              height: 50,
-            ),
-            image == null
-                ? Container(
-                    width: 200,
-                    height: 200,
-                    color: Colors.grey,
+        child: FutureBuilder(
+            future: Firestore.getProfile(myUid!),
+            builder: (context, snapshot) {
+              return Column(
+                children: [
+                  SizedBox(
+                    height: 50,
+                  ),
+                  image == null
+                      ? Container(
+                          width: 200,
+                          height: 200,
+                          color: Colors.grey,
+                        )
+                      : Container(
+                          width: 200,
+                          height: 200,
+                          child: Image.file(
+                            image!,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                  SizedBox(
+                    height: 50,
+                  ),
+                  Row(
+                    children: [
+                      Container(
+                          width: 120,
+                          child: Text(
+                            '名前',
+                            textAlign: TextAlign.center,
+                          )),
+                      Expanded(
+                        child: TextField(
+                          decoration: InputDecoration(hintText: 'currentUser'),
+                          controller: controller,
+                        ),
+                      )
+                    ],
+                  ),
+                  SizedBox(height: 50),
+                  Row(
+                    children: [
+                      Container(width: 120, child: Text('プロフィール画像')),
+                      Expanded(
+                        child: Container(
+                          alignment: Alignment.center,
+                          child: Container(
+                            width: 150,
+                            height: 40,
+                            child: ElevatedButton(
+                              onPressed: () {
+                                getImageFromGallery();
+                              },
+                              child: Text('画像を選択'),
+                            ),
+                          ),
+                        ),
+                      )
+                    ],
+                  ),
+                  SizedBox(
+                    height: 50,
+                  ),
+                  ElevatedButton(
+                    onPressed: () async {
+                      User newProfile = User(
+                        name: controller.text,
+                        imagePath: imagePath,
+                      );
+                      try {
+                        await Firestore.updateProfile(newProfile);
+                        Navigator.of(context).pop();
+                        _showDialog(context, 'プロフィールを更新しました');
+                      } catch (e) {
+                        _showDialog(context, e.toString());
+                      }
+                    },
+                    child: Text('保存する'),
                   )
-                : Container(
-                    width: 200,
-                    height: 200,
-                    child: Image.file(
-                      image!,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-            SizedBox(
-              height: 50,
-            ),
-            Row(
-              children: [
-                Container(
-                    width: 120,
-                    child: Text(
-                      '名前',
-                      textAlign: TextAlign.center,
-                    )),
-                Expanded(
-                  child: TextField(
-                    decoration: InputDecoration(hintText: myUid),
-                    controller: controller,
-                  ),
-                )
-              ],
-            ),
-            SizedBox(height: 50),
-            Row(
-              children: [
-                Container(width: 120, child: Text('プロフィール画像')),
-                Expanded(
-                  child: Container(
-                    alignment: Alignment.center,
-                    child: Container(
-                      width: 150,
-                      height: 40,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          getImageFromGallery();
-                        },
-                        child: Text('画像を選択'),
-                      ),
-                    ),
-                  ),
-                )
-              ],
-            ),
-            SizedBox(
-              height: 50,
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                User newProfile = User(
-                  name: controller.text,
-                  imagePath: imagePath,
-                );
-                try {
-                  await Firestore.updateProfile(newProfile);
-                  Navigator.of(context).pop();
-                  _showDialog(context, 'プロフィールを更新しました');
-                } catch (e) {
-                  _showDialog(context, e.toString());
-                }
-              },
-              child: Text('保存する'),
-            )
-          ],
-        ),
+                ],
+              );
+            }),
       ),
     );
   }
