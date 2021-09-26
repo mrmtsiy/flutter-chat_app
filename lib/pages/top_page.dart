@@ -1,4 +1,5 @@
 import 'package:chat_app/model/talk_room.dart';
+import 'package:chat_app/pages/login.dart';
 import 'package:chat_app/pages/settings_profile.dart';
 import 'package:chat_app/pages/talk_room.dart';
 import 'package:chat_app/utils/firebase.dart';
@@ -37,6 +38,13 @@ class _TopPageState extends State<TopPage> {
               },
               icon: Icon(Icons.settings))
         ],
+        leading: IconButton(
+          onPressed: () {
+            Navigator.push(
+                context, MaterialPageRoute(builder: (context) => LoginPage()));
+          },
+          icon: Icon(Icons.person),
+        ),
       ),
       body: StreamBuilder<QuerySnapshot>(
           stream: Firestore.roomSnapshot,

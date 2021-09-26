@@ -22,7 +22,7 @@ class Firestore {
       //作成したユーザーを端末に保存する
       await SharedPrefs.setUid(newDoc.id);
 
-      List<String>? userIds = await getUser();
+      List<String>? userIds = await getUsers();
       userIds!.forEach((user) async {
         // newDocは作成した自身のアカウント
         if (user != newDoc.id) {
@@ -38,7 +38,7 @@ class Firestore {
     }
   }
 
-  static Future<List<String>?> getUser() async {
+  static Future<List<String>?> getUsers() async {
     try {
       final snapshot = await userRef.get();
       List<String> userIds = [];
