@@ -1,5 +1,6 @@
 import 'package:chat_app/model/talk_room.dart';
 import 'package:chat_app/pages/login.dart';
+import 'package:chat_app/pages/register.dart';
 import 'package:chat_app/pages/settings_profile.dart';
 import 'package:chat_app/pages/talk_room.dart';
 import 'package:chat_app/utils/firebase.dart';
@@ -15,6 +16,11 @@ class TopPage extends StatefulWidget {
 
 class _TopPageState extends State<TopPage> {
   List<TalkRoom>? talkUserList = [];
+  final List<Widget> _pageList = <Widget>[
+    TopPage(),
+    LoginPage(),
+    RegisterPage(),
+  ];
 
   Future<void> createRooms() async {
     String? myUid = SharedPrefs.getUid();

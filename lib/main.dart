@@ -1,4 +1,4 @@
-import 'package:chat_app/pages/top_page.dart';
+import 'package:chat_app/pages/route.dart';
 import 'package:chat_app/utils/firebase.dart';
 import 'package:chat_app/utils/shared_prefs.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -27,9 +27,9 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        primaryColor: Colors.blue,
       ),
-      home: TopPage(),
+      home: RoutePage(),
     );
   }
 }
