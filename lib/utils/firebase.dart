@@ -3,8 +3,19 @@ import 'package:chat_app/model/talk_room.dart';
 import 'package:chat_app/model/user.dart';
 import 'package:chat_app/utils/shared_prefs.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class Firestore {
+  static bool isLoading = false;
+
+  static Future<void> startLoading() async {
+    isLoading = true;
+  }
+
+  static Future<void> endloading() async {
+    isLoading = false;
+  }
+
   static FirebaseFirestore _firestoreInstance = FirebaseFirestore.instance;
   static final userRef = _firestoreInstance.collection('user');
   static final roomRef = _firestoreInstance.collection('room');
@@ -53,9 +64,9 @@ class Firestore {
     }
   }
 
-  static Future<User?> getProfile(String uid) async {
+  static Future<Users?> getProfile(String uid) async {
     final profile = await userRef.doc(uid).get();
-    User myProfile = User(
+    Users myProfile = Users(
       name: profile.data()!['name'],
       imagePath: profile.data()!['image_path'],
       uid: uid,
@@ -63,9 +74,9 @@ class Firestore {
     return myProfile;
   }
 
-  static Future<void> updateProfile(User newProfile) async {
-    String? myUid = SharedPrefs.getUid();
-    userRef.doc(myUid).update({
+  static Future<void> updateProfile(Users newProfile) async {
+    String? myUid = FirebaseAuth.instance.currentUser?.uid;
+    await userRef.doc(myUid).update({
       'name': newProfile.name,
       'image_path': newProfile.imagePath,
     });
@@ -83,7 +94,7 @@ class Firestore {
             return;
           }
         });
-        User? yourProfile = await getProfile(yourUid!);
+        Users? yourProfile = await getProfile(yourUid!);
         TalkRoom room = TalkRoom(
             roomId: doc.id,
             talkUser: yourProfile,
@@ -102,7 +113,7 @@ class Firestore {
     final snapshot = await messageRef.get();
     Future.forEach(snapshot.docs, (dynamic doc) {
       bool isMe;
-      String? myUid = SharedPrefs.getUid();
+      String? myUid = FirebaseAuth.instance.currentUser?.uid;
       if (doc.data()['sender_id'] == myUid) {
         isMe = true;
       } else {
@@ -121,10 +132,10 @@ class Firestore {
 
   static Future<void> sendMessage(String roomId, String message) async {
     final messageRef = roomRef.doc(roomId).collection('message');
-    String? myUid = SharedPrefs.getUid();
+    String? myUid = FirebaseAuth.instance.currentUser?.uid;
     await messageRef.add({
       'message': message,
-      'send_id': myUid,
+      'sender_id': myUid,
       'send_time': Timestamp.now(),
     });
 
@@ -136,5 +147,29 @@ class Firestore {
 
   static Stream<QuerySnapshot>? messageSnapshot(String roomId) {
     return roomRef.doc(roomId).collection('message').snapshots();
+  }
+}
+
+class Auth {
+  static String? email;
+  static String? name;
+  static String? profileImage;
+
+  static final FirebaseAuth auth = FirebaseAuth.instance;
+  static final user = auth.currentUser;
+  static Future<void> signUp() async {}
+
+  static Future<void> logOut() async {
+    await FirebaseAuth.instance.signOut();
+  }
+
+  static Future<void> fetchUser(String uid) async {
+    email = user?.email;
+    final uid = user?.uid;
+    final snapshot =
+        await FirebaseFirestore.instance.collection('user').doc(uid).get();
+    final data = snapshot.data();
+    name = data?['name'];
+    profileImage = data?['image_path'];
   }
 }
