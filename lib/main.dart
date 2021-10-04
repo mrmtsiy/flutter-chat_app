@@ -1,19 +1,20 @@
 import 'package:chat_app/pages/route.dart';
 import 'package:chat_app/utils/firebase.dart';
-import 'package:chat_app/utils/shared_prefs.dart';
+
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  await SharedPrefs.setInstance();
-  checkAccount();
+  // await SharedPrefs.setInstance();
+  // checkAccount();
   runApp(MyApp());
 }
 
 Future<void> checkAccount() async {
-  String? uid = SharedPrefs.getUid();
+  String? uid = FirebaseAuth.instance.currentUser?.uid;
   // アカウントが生成されていなかった場合、アカウントを新規に作成する
   if (uid == '') {
     Firestore.addUser();

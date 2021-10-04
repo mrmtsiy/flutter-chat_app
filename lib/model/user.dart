@@ -1,7 +1,7 @@
-class User {
+class Users {
   String? name;
   String? uid;
   String? imagePath;
 
-  User({this.name, this.uid, this.imagePath});
+  Users({this.name, this.uid, this.imagePath});
 }

@@ -3,7 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class TalkRoom {
   String? roomId;
-  User? talkUser;
+  Users? talkUser;
   String? lastMessage;
   Timestamp? lastMessageTime;
 

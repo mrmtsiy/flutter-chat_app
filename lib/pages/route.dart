@@ -1,9 +1,7 @@
 import 'package:chat_app/pages/login.dart';
 import 'package:chat_app/pages/register.dart';
 import 'package:chat_app/pages/top_page.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class RoutePage extends StatefulWidget {
@@ -13,6 +11,7 @@ class RoutePage extends StatefulWidget {
 
 class _RoutePageState extends State<RoutePage> {
   @override
+  // ignore: override_on_non_overriding_member
   int _currentIndex = 0;
   int get currentIndex => _currentIndex;
 

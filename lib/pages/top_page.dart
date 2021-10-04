@@ -1,11 +1,11 @@
 import 'package:chat_app/model/talk_room.dart';
+import 'package:chat_app/pages/current_user_profile_page.dart';
 import 'package:chat_app/pages/login.dart';
 import 'package:chat_app/pages/register.dart';
-import 'package:chat_app/pages/settings_profile.dart';
 import 'package:chat_app/pages/talk_room.dart';
 import 'package:chat_app/utils/firebase.dart';
-import 'package:chat_app/utils/shared_prefs.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart' as intl;
 
@@ -16,15 +16,15 @@ class TopPage extends StatefulWidget {
 
 class _TopPageState extends State<TopPage> {
   List<TalkRoom>? talkUserList = [];
-  final List<Widget> _pageList = <Widget>[
+  final List<Widget> pageList = <Widget>[
     TopPage(),
     LoginPage(),
     RegisterPage(),
   ];
 
   Future<void> createRooms() async {
-    String? myUid = SharedPrefs.getUid();
-    talkUserList = await Firestore.getRooms(myUid!);
+    String? myUid = FirebaseAuth.instance.currentUser!.uid;
+    talkUserList = await Firestore.getRooms(myUid);
   }
 
   @override
@@ -35,19 +35,26 @@ class _TopPageState extends State<TopPage> {
         actions: [
           IconButton(
               onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => SettingsProfilePage(),
-                  ),
-                );
+                // if (FirebaseAuth.instance.currentUser != null) {
+                //   Navigator.push(
+                //     context,
+                //     MaterialPageRoute(
+                //       builder: (context) => SettingsProfilePage(),
+                //     ),
+                //   );
+                //   print('ログインしている');
+                // } else {
+                //   print('ログインしていない');
+                // }
               },
               icon: Icon(Icons.settings))
         ],
         leading: IconButton(
           onPressed: () {
             Navigator.push(
-                context, MaterialPageRoute(builder: (context) => LoginPage()));
+                context,
+                MaterialPageRoute(
+                    builder: (context) => CurrentUserProfilePage()));
           },
           icon: Icon(Icons.person),
         ),

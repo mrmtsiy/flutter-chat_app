@@ -1,8 +1,8 @@
 import 'package:chat_app/model/message.dart';
 import 'package:chat_app/model/talk_room.dart';
 import 'package:chat_app/utils/firebase.dart';
-import 'package:chat_app/utils/shared_prefs.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart' as intl;
 
@@ -15,6 +15,7 @@ class TalkRoomPage extends StatefulWidget {
 }
 
 class _TalkRoomPageState extends State<TalkRoomPage> {
+  bool isLoading = false;
   List<Message>? messageList = [];
   TextEditingController controller = TextEditingController();
 
@@ -56,11 +57,12 @@ class _TalkRoomPageState extends State<TalkRoomPage> {
                                 child: Row(
                                   crossAxisAlignment: CrossAxisAlignment.end,
                                   textDirection: _message.isMe!
-                                      ? TextDirection.ltr
-                                      : TextDirection.rtl,
+                                      ? TextDirection.rtl
+                                      : TextDirection.ltr,
                                   children: [
                                     _message.isMe!
-                                        ? Padding(
+                                        ? SizedBox()
+                                        : Padding(
                                             padding: const EdgeInsets.symmetric(
                                                 horizontal: 8.0),
                                             child: CircleAvatar(
@@ -69,8 +71,7 @@ class _TalkRoomPageState extends State<TalkRoomPage> {
                                                       .imagePath!),
                                               radius: 20,
                                             ),
-                                          )
-                                        : SizedBox(),
+                                          ),
                                     Container(
                                         constraints: BoxConstraints(
                                             maxWidth: MediaQuery.of(context)
@@ -123,7 +124,8 @@ class _TalkRoomPageState extends State<TalkRoomPage> {
                       onPressed: () async {
                         print('送信');
                         if (controller.text.isNotEmpty) {
-                          final String? myUid = SharedPrefs.getUid();
+                          final String? myUid =
+                              FirebaseAuth.instance.currentUser!.uid;
                           await Firestore.sendMessage(
                               widget.room!.roomId!, controller.text);
                           Firestore.getProfile(myUid!);
@@ -134,7 +136,14 @@ class _TalkRoomPageState extends State<TalkRoomPage> {
                 ],
               ),
             ),
-          )
+          ),
+          if (isLoading)
+            Container(
+              color: Colors.black54,
+              child: Center(
+                child: CircularProgressIndicator(),
+              ),
+            )
         ],
       ),
     );
