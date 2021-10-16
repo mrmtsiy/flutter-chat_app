@@ -37,6 +37,41 @@ class _LoginPageState extends State<LoginPage> {
             padding: const EdgeInsets.all(20.0),
             child: Column(
               children: [
+                Center(
+                  child: Container(
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 80,
+                          height: 80,
+                          child: Image.network(
+                              'https://cdn-images-1.medium.com/max/1200/1*ilC2Aqp5sZd1wi0CopD1Hw.png'),
+                        ),
+                        SizedBox(
+                          width: 20,
+                        ),
+                        Text('Flutter Chat',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 40,
+                              shadows: [
+                                Shadow(
+                                  blurRadius: 1.0,
+                                  color: Colors.black12,
+                                  offset: Offset(5.0, 5.0),
+                                ),
+                                Shadow(
+                                  color: Colors.black26,
+                                  blurRadius: 10.0,
+                                  offset: Offset(1.0, 5.0),
+                                ),
+                              ],
+                            )),
+                      ],
+                    ),
+                  ),
+                ),
                 SizedBox(
                   height: 50,
                 ),
@@ -103,11 +138,12 @@ class _LoginPageState extends State<LoginPage> {
                       );
                       user = _result!.user;
 
-                      Navigator.push(
+                      Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(builder: (context) => RoutePage()),
                       );
                       _infoText = 'FlutterChatへようこそ';
+                      setState(() {});
                       final snackBar = SnackBar(
                           backgroundColor: Colors.green,
                           content: Text(_infoText));

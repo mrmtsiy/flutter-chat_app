@@ -19,26 +19,28 @@ class Firestore {
   static FirebaseFirestore _firestoreInstance = FirebaseFirestore.instance;
   static final userRef = _firestoreInstance.collection('user');
   static final roomRef = _firestoreInstance.collection('room');
-  static final roomSnapshot = roomRef.snapshots();
+  // static final roomSnapshot = roomRef.snapshots();
 
   static Future<void> addUser() async {
     try {
-      final newDoc = await userRef.add({
-        'name': 'NoName',
-        'image_path':
-            'https://images-fe.ssl-images-amazon.com/images/I/41vCDELt1xL.jpg',
-      });
+      final currentUser = FirebaseAuth.instance.currentUser!;
+      // final newDoc = await userRef.add({
+      //   'name': 'NoName',
+      //   'image_path':
+      //       'https://images-fe.ssl-images-amazon.com/images/I/41vCDELt1xL.jpg',
+      //   'uid': myUid,
+      // });
       print('アカウント作成完了');
 
       //作成したユーザーを端末に保存する
-      await SharedPrefs.setUid(newDoc.id);
+      await SharedPrefs.setUid(currentUser.uid);
 
       List<String>? userIds = await getUsers();
-      userIds!.forEach((user) async {
+      userIds?.forEach((user) async {
         // newDocは作成した自身のアカウント
-        if (user != newDoc.id) {
+        if (user != currentUser.uid) {
           await roomRef.add({
-            'joined_user_ids': [user, newDoc.id],
+            'joined_user_ids': [user, currentUser.uid],
             'updated_time': Timestamp.now()
           });
         }
@@ -47,6 +49,19 @@ class Firestore {
     } catch (e) {
       print('失敗しました');
     }
+  }
+
+  static Future<void> setRoom() async {
+    final currentUser = FirebaseAuth.instance.currentUser;
+    List<String>? userIds = await getUsers();
+    userIds?.forEach((user) async {
+      if (user != currentUser?.uid) {
+        await roomRef.add({
+          'joined_user_ids': [user, currentUser?.uid],
+          'updated_time': Timestamp.now()
+        });
+      }
+    });
   }
 
   static Future<List<String>?> getUsers() async {
@@ -67,8 +82,8 @@ class Firestore {
   static Future<Users?> getProfile(String uid) async {
     final profile = await userRef.doc(uid).get();
     Users myProfile = Users(
-      name: profile.data()!['name'],
-      imagePath: profile.data()!['image_path'],
+      name: profile.data()?['name'],
+      imagePath: profile.data()?['image_path'],
       uid: uid,
     );
     return myProfile;
@@ -109,6 +124,7 @@ class Firestore {
 
   static Future<List<Message>?> getMessages(String roomId) async {
     final messageRef = roomRef.doc(roomId).collection('message');
+
     List<Message>? messageList = [];
     final snapshot = await messageRef.get();
     Future.forEach(snapshot.docs, (dynamic doc) {
@@ -121,8 +137,10 @@ class Firestore {
       }
       Message message = Message(
         message: doc.data()['message'],
+        image: doc.data()['image'],
         isMe: isMe,
         sendTime: doc.data()['send_time'],
+        messageId: doc.id,
       );
       messageList.add(message);
     });
@@ -132,11 +150,13 @@ class Firestore {
 
   static Future<void> sendMessage(String roomId, String message) async {
     final messageRef = roomRef.doc(roomId).collection('message');
+    final id = messageRef.doc().id;
     String? myUid = FirebaseAuth.instance.currentUser?.uid;
-    await messageRef.add({
+    await messageRef.doc(id).set({
       'message': message,
       'sender_id': myUid,
       'send_time': Timestamp.now(),
+      'messageId': id,
     });
 
     roomRef.doc(roomId).update({
@@ -145,8 +165,39 @@ class Firestore {
     });
   }
 
+  static Future<void> sendImage(String roomId, String image) async {
+    final messageRef = roomRef.doc(roomId).collection('message');
+    final id = messageRef.doc().id;
+    String? myUid = FirebaseAuth.instance.currentUser?.uid;
+    await messageRef.doc(id).set({
+      'image': image,
+      'sender_id': myUid,
+      'send_time': Timestamp.now(),
+      'messageId': id,
+    });
+
+    roomRef.doc(roomId).update({
+      'last_message': '画像を送信しました',
+      'updated_time': Timestamp.now(),
+    });
+  }
+
+  static Future<void> deleteMessage(String roomId, String messageId) async {
+    print(messageId);
+    await roomRef.doc(roomId).collection('message').doc(messageId).delete();
+
+    roomRef.doc(roomId).update({
+      'last_message': '投稿を削除しました',
+      'updated_time': Timestamp.now(),
+    });
+  }
+
   static Stream<QuerySnapshot>? messageSnapshot(String roomId) {
     return roomRef.doc(roomId).collection('message').snapshots();
+  }
+
+  static Stream<QuerySnapshot>? roomSnapshot() {
+    return roomRef.snapshots();
   }
 }
 
@@ -156,16 +207,19 @@ class Auth {
   static String? profileImage;
 
   static final FirebaseAuth auth = FirebaseAuth.instance;
-  static final user = auth.currentUser;
-  static Future<void> signUp() async {}
 
   static Future<void> logOut() async {
     await FirebaseAuth.instance.signOut();
   }
 
   static Future<void> fetchUser(String uid) async {
+    final user = auth.currentUser;
+    await Future.delayed(
+      Duration(seconds: 1),
+    );
+
     email = user?.email;
-    final uid = user?.uid;
+    String? uid = user?.uid;
     final snapshot =
         await FirebaseFirestore.instance.collection('user').doc(uid).get();
     final data = snapshot.data();

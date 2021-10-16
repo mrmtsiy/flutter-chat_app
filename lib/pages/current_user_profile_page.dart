@@ -20,7 +20,6 @@ class _CurrentUserProfilePageState extends State<CurrentUserProfilePage> {
   String? imagePath;
   TextEditingController controller = TextEditingController();
   User? currentUser;
-  String _infoText = '';
 
   Future<void> getImageFromGallery() async {
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
@@ -53,15 +52,47 @@ class _CurrentUserProfilePageState extends State<CurrentUserProfilePage> {
         actions: [
           IconButton(
             onPressed: () async {
-              try {
-                await Auth.logOut();
-                Navigator.pushReplacement(context,
-                    MaterialPageRoute(builder: (context) => LoginPage()));
-                _infoText = 'ログアウトしました';
-                final snackBar = SnackBar(
-                    backgroundColor: Colors.green, content: Text(_infoText));
-                ScaffoldMessenger.of(context).showSnackBar(snackBar);
-              } catch (e) {}
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    title: Center(child: Text('ログアウトしますか？')),
+                    actions: <Widget>[
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: 16.0),
+                          child: Row(
+                            children: [
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                },
+                                child: Text('キャンセル'),
+                              ),
+                              SizedBox(
+                                width: 30,
+                              ),
+                              ElevatedButton(
+                                onPressed: () async {
+                                  await Auth.logOut();
+                                  Navigator.pushAndRemoveUntil(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => LoginPage()),
+                                    (Route<dynamic> route) => false,
+                                  );
+                                },
+                                child: Text('ログアウト'),
+                              ),
+                            ],
+                          ),
+                        ),
+                      )
+                    ],
+                  );
+                },
+              );
             },
             icon: Icon(Icons.logout),
           )
@@ -72,6 +103,11 @@ class _CurrentUserProfilePageState extends State<CurrentUserProfilePage> {
         child: FutureBuilder(
             future: Auth.fetchUser(myUid!),
             builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Center(
+                  child: CircularProgressIndicator(),
+                );
+              }
               return Center(
                 child: Column(
                   children: [
@@ -88,8 +124,14 @@ class _CurrentUserProfilePageState extends State<CurrentUserProfilePage> {
                             width: 200,
                             height: 200,
                             child: Image.network(
-                              Auth.profileImage!,
+                              Auth.profileImage ?? '',
                               fit: BoxFit.cover,
+                              errorBuilder: (c, o, s) {
+                                return const Icon(
+                                  Icons.error,
+                                  color: Colors.red,
+                                );
+                              },
                             ),
                           ),
                     SizedBox(
@@ -97,7 +139,7 @@ class _CurrentUserProfilePageState extends State<CurrentUserProfilePage> {
                     ),
                     Container(
                       child: Text(
-                        Auth.name == '' ? 'ユーザー名が設定されていません' : Auth.name!,
+                        Auth.name ?? 'ユーザー名が設定されていません',
                         style: TextStyle(fontSize: 24),
                       ),
                     ),
@@ -107,8 +149,9 @@ class _CurrentUserProfilePageState extends State<CurrentUserProfilePage> {
                         await Navigator.of(context).push(MaterialPageRoute(
                             builder: (context) => SettingsProfilePage(
                                 Auth.name, Auth.profileImage)));
-                        Auth.fetchUser(myUid);
+                        await Auth.fetchUser(myUid);
                         setState(() {});
+                        print(Auth.name);
                       },
                       child: Text('編集する'),
                     )

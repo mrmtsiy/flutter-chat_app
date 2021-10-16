@@ -1,13 +1,11 @@
 import 'package:chat_app/model/talk_room.dart';
 import 'package:chat_app/pages/current_user_profile_page.dart';
-import 'package:chat_app/pages/login.dart';
-import 'package:chat_app/pages/register.dart';
+import 'package:chat_app/pages/profile_image_page.dart';
 import 'package:chat_app/pages/talk_room.dart';
 import 'package:chat_app/utils/firebase.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart' as intl;
 
 class TopPage extends StatefulWidget {
   @override
@@ -16,11 +14,6 @@ class TopPage extends StatefulWidget {
 
 class _TopPageState extends State<TopPage> {
   List<TalkRoom>? talkUserList = [];
-  final List<Widget> pageList = <Widget>[
-    TopPage(),
-    LoginPage(),
-    RegisterPage(),
-  ];
 
   Future<void> createRooms() async {
     String? myUid = FirebaseAuth.instance.currentUser!.uid;
@@ -31,24 +24,8 @@ class _TopPageState extends State<TopPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('トークリスト'),
-        actions: [
-          IconButton(
-              onPressed: () {
-                // if (FirebaseAuth.instance.currentUser != null) {
-                //   Navigator.push(
-                //     context,
-                //     MaterialPageRoute(
-                //       builder: (context) => SettingsProfilePage(),
-                //     ),
-                //   );
-                //   print('ログインしている');
-                // } else {
-                //   print('ログインしていない');
-                // }
-              },
-              icon: Icon(Icons.settings))
-        ],
+        title: Text('ユーザーリスト'),
+        actions: [IconButton(onPressed: () {}, icon: Icon(Icons.search))],
         leading: IconButton(
           onPressed: () {
             Navigator.push(
@@ -60,44 +37,110 @@ class _TopPageState extends State<TopPage> {
         ),
       ),
       body: StreamBuilder<QuerySnapshot>(
-          stream: Firestore.roomSnapshot,
+          stream: Firestore.roomSnapshot(),
           builder: (context, snapshot) {
             return FutureBuilder(
               future: createRooms(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.done) {
                   return ListView.builder(
-                    itemCount: talkUserList!.length,
+                    itemCount: talkUserList?.length,
                     itemBuilder: (context, index) {
-                      DateTime lastMessageTime =
-                          talkUserList![index].lastMessageTime!.toDate();
                       //表示時間
-                      String fromAtNow(DateTime date) {
-                        final Duration difference =
-                            DateTime.now().difference(date);
-                        final int sec = difference.inSeconds;
-
-                        if (sec >= 60 * 60 * 24 * 2) {
-                          return intl.DateFormat('MM/dd')
-                              .format(lastMessageTime);
-                        } else if (sec >= 60 * 60 * 24) {
-                          return '昨日';
-                        } else if (sec >= 60 * 60) {
-                          return '${difference.inHours.toString()}時間前';
-                        } else if (sec >= 60) {
-                          return '${difference.inMinutes.toString()}分前';
-                        } else {
-                          return '$sec秒前';
-                        }
-                      }
 
                       return InkWell(
                         onTap: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) =>
-                                      TalkRoomPage(talkUserList![index])));
+                          showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                title: Column(
+                                  children: [
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.start,
+                                      children: [
+                                        IconButton(
+                                            color: Colors.red,
+                                            onPressed: () {
+                                              Navigator.of(context).pop();
+                                            },
+                                            icon: Icon(Icons.cancel)),
+                                      ],
+                                    ),
+                                    InkWell(
+                                      onTap: () {
+                                        Navigator.of(context).push(
+                                          MaterialPageRoute(
+                                              builder: (context) =>
+                                                  ProfileImagePage(
+                                                      talkUserList![index]
+                                                          .talkUser),
+                                              fullscreenDialog: true),
+                                        );
+                                      },
+                                      child: CircleAvatar(
+                                        radius: 80,
+                                        backgroundImage: NetworkImage(
+                                          talkUserList![index]
+                                                  .talkUser!
+                                                  .imagePath ??
+                                              'https://freesvg.org/img/abstract-user-flat-1.png',
+                                        ),
+                                        backgroundColor: Colors.white,
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      height: 50,
+                                    ),
+                                    Text(
+                                      talkUserList![index].talkUser!.name ??
+                                          'NoName',
+                                      style: TextStyle(
+                                          fontSize: 25,
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                    SizedBox(
+                                      height: 30,
+                                    ),
+                                    Center(
+                                      child: Container(
+                                        width: 300,
+                                        height: 100,
+                                        decoration: BoxDecoration(
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: Colors.black26,
+                                              spreadRadius: 1.0,
+                                              blurRadius: 10.0,
+                                              offset: Offset(10, 10),
+                                            ),
+                                          ],
+                                        ),
+                                        child: InkWell(
+                                          onTap: () {
+                                            Navigator.of(context)
+                                                .pushReplacement(
+                                                    MaterialPageRoute(
+                                                        builder: (context) =>
+                                                            TalkRoomPage(
+                                                                talkUserList![
+                                                                    index])));
+                                          },
+                                          child: Card(
+                                            color: Colors.white,
+                                            child: Center(
+                                              child: Text('トークする'),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    )
+                                  ],
+                                ),
+                              );
+                            },
+                          );
                         },
                         child: Container(
                           height: 70,
@@ -109,9 +152,11 @@ class _TopPageState extends State<TopPage> {
                                 child: CircleAvatar(
                                   backgroundImage: NetworkImage(
                                       talkUserList![index]
-                                          .talkUser!
-                                          .imagePath!),
+                                              .talkUser!
+                                              .imagePath ??
+                                          ''),
                                   radius: 30,
+                                  backgroundColor: Colors.white,
                                 ),
                               ),
                               Column(
@@ -121,28 +166,18 @@ class _TopPageState extends State<TopPage> {
                                   Container(
                                     width: 200,
                                     child: Text(
-                                      talkUserList![index].talkUser!.name!,
+                                      talkUserList![index].talkUser!.name ??
+                                          'NoName',
                                       style: TextStyle(
                                           fontSize: 18,
                                           fontWeight: FontWeight.bold),
                                     ),
                                   ),
-                                  Text(
-                                    talkUserList![index].lastMessage!,
-                                    style: TextStyle(color: Colors.grey),
-                                  )
                                 ],
                               ),
                               SizedBox(
                                 width: 60,
                               ),
-                              Container(
-                                  width: 60,
-                                  alignment: Alignment.center,
-                                  child: Text(
-                                    fromAtNow(lastMessageTime),
-                                    style: TextStyle(color: Colors.grey),
-                                  ))
                             ],
                           ),
                         ),
