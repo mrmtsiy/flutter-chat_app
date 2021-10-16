@@ -1,3 +1,4 @@
+import 'package:chat_app/pages/login.dart';
 import 'package:chat_app/pages/route.dart';
 import 'package:chat_app/utils/firebase.dart';
 
@@ -30,7 +31,19 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primaryColor: Colors.blue,
       ),
-      home: RoutePage(),
+      home: StreamBuilder(
+        stream: FirebaseAuth.instance.authStateChanges(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
+          }
+          if (snapshot.hasData) {
+            return RoutePage();
+          } else {
+            return LoginPage();
+          }
+        },
+      ),
     );
   }
 }

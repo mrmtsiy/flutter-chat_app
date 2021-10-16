@@ -1,3 +1,4 @@
+import 'package:chat_app/pages/login.dart';
 import 'package:chat_app/utils/authentication_error.dart';
 import 'package:chat_app/utils/firebase.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -37,6 +38,41 @@ class _RegisterPageState extends State<RegisterPage> {
             padding: const EdgeInsets.all(20.0),
             child: Column(
               children: [
+                Center(
+                  child: Container(
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 80,
+                          height: 80,
+                          child: Image.network(
+                              'https://cdn-images-1.medium.com/max/1200/1*ilC2Aqp5sZd1wi0CopD1Hw.png'),
+                        ),
+                        SizedBox(
+                          width: 20,
+                        ),
+                        Text('Flutter Chat',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 40,
+                              shadows: [
+                                Shadow(
+                                  blurRadius: 1.0,
+                                  color: Colors.black12,
+                                  offset: Offset(5.0, 5.0),
+                                ),
+                                Shadow(
+                                  color: Colors.black26,
+                                  blurRadius: 10.0,
+                                  offset: Offset(1.0, 5.0),
+                                ),
+                              ],
+                            )),
+                      ],
+                    ),
+                  ),
+                ),
                 SizedBox(
                   height: 50,
                 ),
@@ -115,9 +151,15 @@ class _RegisterPageState extends State<RegisterPage> {
                           final userDoc = FirebaseFirestore.instance
                               .collection('user')
                               .doc(uid);
-                          await userDoc
-                              .set({'uid': uid, 'email': emailController.text});
+                          await userDoc.set({
+                            'uid': uid,
+                            'email': emailController.text,
+                            'image_path':
+                                'https://freesvg.org/img/abstract-user-flat-1.png'
+                          });
+                          await Firestore.setRoom();
                         }
+
                         setState(() {
                           _infoText = 'FlutterChatへようこそ';
                           final snackBar = SnackBar(
@@ -127,7 +169,8 @@ class _RegisterPageState extends State<RegisterPage> {
                         });
                         //確認のEmailを送信
                         // _user!.sendEmailVerification();
-                        Navigator.of(context).pop();
+                        Navigator.of(context).pushReplacement(MaterialPageRoute(
+                            builder: (context) => LoginPage()));
                       } catch (e) {
                         setState(() {
                           _infoText = 'ユーザーの登録に失敗しました';

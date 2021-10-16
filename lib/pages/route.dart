@@ -1,5 +1,5 @@
-import 'package:chat_app/pages/login.dart';
 import 'package:chat_app/pages/register.dart';
+import 'package:chat_app/pages/talk_list_page.dart';
 import 'package:chat_app/pages/top_page.dart';
 
 import 'package:flutter/material.dart';
@@ -22,7 +22,7 @@ class _RoutePageState extends State<RoutePage> {
 
   static final List<Widget> _pageList = <Widget>[
     TopPage(),
-    LoginPage(),
+    TalkListPage(),
     RegisterPage(),
   ];
 

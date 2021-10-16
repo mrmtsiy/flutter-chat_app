@@ -10,7 +10,7 @@ import 'package:image_picker/image_picker.dart';
 
 class SettingsProfilePage extends StatefulWidget {
   SettingsProfilePage(this.name, this.profileImage) {
-    controller.text = name!;
+    controller.text = name ?? '';
   }
   final TextEditingController controller = TextEditingController();
   final String? name;
@@ -38,7 +38,8 @@ class _SettingsProfilePageState extends State<SettingsProfilePage> {
   }
 
   Future<String?> uploadImage() async {
-    final ref = FirebaseStorage.instance.ref('test_pic.png');
+    final ref = FirebaseStorage.instance
+        .ref('${FirebaseAuth.instance.currentUser?.uid}.png');
     final storedImage = await ref.putFile(image!);
     imagePath = await loadImage(storedImage);
     return imagePath;
@@ -139,7 +140,7 @@ class _SettingsProfilePageState extends State<SettingsProfilePage> {
                         onPressed: () async {
                           Users newProfile = Users(
                             name: widget.controller.text,
-                            imagePath: imagePath,
+                            imagePath: imagePath ?? widget.profileImage,
                           );
                           try {
                             await Firestore.updateProfile(newProfile);
