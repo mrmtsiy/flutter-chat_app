@@ -1,4 +1,4 @@
-import 'package:chat_app/pages/register.dart';
+import 'package:chat_app/pages/group_page.dart';
 import 'package:chat_app/pages/talk_list_page.dart';
 import 'package:chat_app/pages/top_page.dart';
 
@@ -23,7 +23,7 @@ class _RoutePageState extends State<RoutePage> {
   static final List<Widget> _pageList = <Widget>[
     TopPage(),
     TalkListPage(),
-    RegisterPage(),
+    GroupPage(),
   ];
 
   Widget build(BuildContext context) {
@@ -48,8 +48,8 @@ class _RoutePageState extends State<RoutePage> {
             label: 'Talk',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
-            label: 'Setting',
+            icon: Icon(Icons.group),
+            label: 'Group',
           ),
         ],
       ),
