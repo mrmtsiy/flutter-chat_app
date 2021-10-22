@@ -1,3 +1,5 @@
+import 'package:chat_app/model/group.dart';
+import 'package:chat_app/model/member.dart';
 import 'package:chat_app/model/message.dart';
 import 'package:chat_app/model/talk_room.dart';
 import 'package:chat_app/model/user.dart';
@@ -19,6 +21,7 @@ class Firestore {
   static FirebaseFirestore _firestoreInstance = FirebaseFirestore.instance;
   static final userRef = _firestoreInstance.collection('user');
   static final roomRef = _firestoreInstance.collection('room');
+  static final groupRef = _firestoreInstance.collection('group');
   // static final roomSnapshot = roomRef.snapshots();
 
   static Future<void> addUser() async {
@@ -183,7 +186,6 @@ class Firestore {
   }
 
   static Future<void> deleteMessage(String roomId, String messageId) async {
-    print(messageId);
     await roomRef.doc(roomId).collection('message').doc(messageId).delete();
 
     roomRef.doc(roomId).update({
@@ -192,12 +194,82 @@ class Firestore {
     });
   }
 
+  static Future<void> createGroup(String groupName) async {
+    final currentUser = FirebaseAuth.instance.currentUser;
+    Auth.fetchUser(currentUser!.uid);
+
+    final id = groupRef.doc().id;
+    if (groupName.isEmpty) {
+      throw 'グループ名を決めてください';
+    } else {
+      await groupRef.doc(id).set({
+        'groupName': groupName,
+        'joined_user_id': [currentUser.uid],
+        'updated_time': Timestamp.now(),
+        'groupId': id,
+      });
+    }
+  }
+
+  static Future<List<Group>?> getGroup(String myUid) async {
+    final snapshot = await groupRef.get();
+    List<Group>? groupList = [];
+    await Future.forEach(snapshot.docs, (dynamic doc) async {
+      if (doc.data()['joined_user_id'].contains(myUid)) {
+        Group group = Group(
+            groupId: doc.data()['groupId'],
+            groupName: doc.data()['groupName'],
+            member: doc.data()['joined_user_id'],
+            lastMessageTime: doc.data()['updated_time']);
+        groupList.add(group);
+      }
+    });
+    return groupList;
+  }
+
+  static Future<List<Member>?> getGroupMember(String groupId) async {
+    final myUid = Auth.auth.currentUser?.uid;
+    final snapshot = await groupRef.doc(groupId).collection('member').get();
+    List<Member>? memberList = [];
+    await Future.forEach(snapshot.docs, (dynamic doc) async {
+      if (doc.id == myUid) {
+        Member member = Member(
+          groupId: doc.data()['groupId'],
+          userName: doc.data()['userName'],
+        );
+        memberList.add(member);
+      }
+    });
+    return memberList;
+  }
+
+//グループに入る
+  static Future<void> joinGroup(String groupId, String myUid) async {
+    groupRef.doc(groupId).update({
+      'joined_user_id': FieldValue.arrayUnion([myUid])
+    });
+  }
+
+//グループを抜ける
+  static Future<List<Group>?> leaveGroup(String groupId, String myUid) async {
+    groupRef.doc(groupId).update({
+      'joined_user_id': FieldValue.arrayRemove([myUid])
+    });
+  }
+
+//グループに招待する
+  static Future<void> inviteGroup() async {}
+
   static Stream<QuerySnapshot>? messageSnapshot(String roomId) {
     return roomRef.doc(roomId).collection('message').snapshots();
   }
 
   static Stream<QuerySnapshot>? roomSnapshot() {
     return roomRef.snapshots();
+  }
+
+  static Stream<QuerySnapshot>? groupSnapshot() {
+    return groupRef.snapshots();
   }
 }
 
