@@ -1,6 +1,8 @@
 import 'package:chat_app/model/group.dart';
-import 'package:chat_app/model/member.dart';
 import 'package:chat_app/pages/group_create_page.dart';
+import 'package:chat_app/pages/group_talk.dart';
+import 'package:chat_app/pages/invite_page.dart';
+import 'package:chat_app/pages/invited_page.dart';
 import 'package:chat_app/utils/firebase.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -15,11 +17,12 @@ class GroupPage extends StatefulWidget {
 
 class _GroupPageState extends State<GroupPage> {
   List<Group>? groupList = [];
-  List<Member>? memberList = [];
+  List<Group>? invitedList = [];
 
   Future<void> getGroup() async {
     String? myUid = FirebaseAuth.instance.currentUser!.uid;
     groupList = await Firestore.getGroup(myUid);
+    invitedList = await Firestore.getInvitation(myUid);
   }
 
   @override
@@ -27,7 +30,14 @@ class _GroupPageState extends State<GroupPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('グループ'),
-        actions: [IconButton(onPressed: () {}, icon: Icon(Icons.search))],
+        actions: [
+          IconButton(
+              onPressed: () {
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => InvitedPage()));
+              },
+              icon: Icon(Icons.group))
+        ],
         leading: IconButton(
           onPressed: () {
             Navigator.push(context,
@@ -50,7 +60,6 @@ class _GroupPageState extends State<GroupPage> {
                     itemCount: groupList?.length,
                     itemBuilder: (context, index) {
                       String? myUid = FirebaseAuth.instance.currentUser!.uid;
-                      Group _group = groupList![index];
                       DateTime lastMessageTime =
                           groupList![index].lastMessageTime!.toDate();
                       //表示時間
@@ -76,11 +85,11 @@ class _GroupPageState extends State<GroupPage> {
                       if (groupList![index].member!.contains(myUid)) {
                         return InkWell(
                           onTap: () {
-                            // Navigator.push(
-                            //     context,
-                            //     MaterialPageRoute(
-                            //         builder: (context) =>
-                            //             TalkRoomPage(groupList?[index])));
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) =>
+                                        GroupTalkPage(groupList?[index])));
                           },
                           child: Slidable(
                             actionPane: SlidableDrawerActionPane(),
@@ -90,7 +99,14 @@ class _GroupPageState extends State<GroupPage> {
                                 caption: '招待する',
                                 color: Colors.green,
                                 icon: Icons.add,
-                                onTap: () async {},
+                                onTap: () async {
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) =>
+                                              InvitePage(groupList?[index]),
+                                          fullscreenDialog: true));
+                                },
                               ),
                               IconSlideAction(
                                 caption: '退会する',
@@ -148,7 +164,7 @@ class _GroupPageState extends State<GroupPage> {
                                       backgroundImage: NetworkImage(groupList![
                                                   index]
                                               .groupImage ??
-                                          'https://upload.wikimedia.org/wikipedia/commons/thumb/7/75/Netflix_icon.svg/2048px-Netflix_icon.svg.png'),
+                                          'https://www.silhouette-illust.com/wp-content/uploads/2016/10/13707-300x300.jpg'),
                                       radius: 30,
                                       backgroundColor: Colors.white,
                                     ),
@@ -169,7 +185,7 @@ class _GroupPageState extends State<GroupPage> {
                                         ),
                                       ),
                                       Text(
-                                        'メンバー ${_group.member?.length}人',
+                                        groupList![index].lastMessage ?? '',
                                         style: TextStyle(color: Colors.grey),
                                       )
                                     ],

@@ -60,7 +60,7 @@ class _TalkRoomPageState extends State<TalkRoomPage> {
     return Scaffold(
       backgroundColor: Colors.lightBlue[100],
       appBar: AppBar(
-        title: Text(widget.room!.talkUser!.name ?? '名無し'),
+        title: Text(widget.room!.talkUser!.name ?? 'Noname'),
       ),
       body: Stack(
         children: [

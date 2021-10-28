@@ -6,7 +6,7 @@ class Group {
   String? groupName;
   List? member;
   String? groupId;
-  Users? talkUser;
+  List<Users>? talkUser;
   String? lastMessage;
   Timestamp? lastMessageTime;
 
