@@ -168,6 +168,23 @@ class Firestore {
     });
   }
 
+  static Future<void> sendGroupMessage(String groupId, String message) async {
+    final messageRef = groupRef.doc(groupId).collection('message');
+    final id = messageRef.doc().id;
+    String? myUid = FirebaseAuth.instance.currentUser?.uid;
+    await messageRef.doc(id).set({
+      'message': message,
+      'sender_id': myUid,
+      'send_time': Timestamp.now(),
+      'messageId': id,
+    });
+
+    groupRef.doc(groupId).update({
+      'last_message': message,
+      'updated_time': Timestamp.now(),
+    });
+  }
+
   static Future<void> sendImage(String roomId, String image) async {
     final messageRef = roomRef.doc(roomId).collection('message');
     final id = messageRef.doc().id;
@@ -185,6 +202,23 @@ class Firestore {
     });
   }
 
+  static Future<void> sendGroupImage(String groupId, String image) async {
+    final messageRef = groupRef.doc(groupId).collection('message');
+    final id = messageRef.doc().id;
+    String? myUid = FirebaseAuth.instance.currentUser?.uid;
+    await messageRef.doc(id).set({
+      'image': image,
+      'sender_id': myUid,
+      'send_time': Timestamp.now(),
+      'messageId': id,
+    });
+
+    groupRef.doc(groupId).update({
+      'last_message': '画像を送信しました',
+      'updated_time': Timestamp.now(),
+    });
+  }
+
   static Future<void> deleteMessage(String roomId, String messageId) async {
     await roomRef.doc(roomId).collection('message').doc(messageId).delete();
 
@@ -194,7 +228,17 @@ class Firestore {
     });
   }
 
-  static Future<void> createGroup(String groupName) async {
+  static Future<void> deleteGroupMessage(
+      String groupId, String messageId) async {
+    await groupRef.doc(groupId).collection('message').doc(messageId).delete();
+
+    groupRef.doc(groupId).update({
+      'last_message': '投稿を削除しました',
+      'updated_time': Timestamp.now(),
+    });
+  }
+
+  static Future<void> createGroup(String groupName, String groupImage) async {
     final currentUser = FirebaseAuth.instance.currentUser;
     Auth.fetchUser(currentUser!.uid);
 
@@ -207,8 +251,15 @@ class Firestore {
         'joined_user_id': [currentUser.uid],
         'updated_time': Timestamp.now(),
         'groupId': id,
+        'groupImage': groupImage,
       });
     }
+
+    groupRef.doc(id).collection('member').doc(currentUser.uid).set({
+      // 'groupId': id,
+      //   'userName': doc.data()['userName'],
+      //   'userImage': doc.data()['userImage'],
+    });
   }
 
   static Future<List<Group>?> getGroup(String myUid) async {
@@ -217,37 +268,82 @@ class Firestore {
     await Future.forEach(snapshot.docs, (dynamic doc) async {
       if (doc.data()['joined_user_id'].contains(myUid)) {
         Group group = Group(
-            groupId: doc.data()['groupId'],
-            groupName: doc.data()['groupName'],
-            member: doc.data()['joined_user_id'],
-            lastMessageTime: doc.data()['updated_time']);
+          groupId: doc.data()['groupId'],
+          groupName: doc.data()['groupName'],
+          member: doc.data()['joined_user_id'],
+          lastMessage: doc.data()['last_message'],
+          lastMessageTime: doc.data()['updated_time'],
+          groupImage: doc.data()['groupImage'],
+        );
+
         groupList.add(group);
       }
     });
     return groupList;
   }
 
-  static Future<List<Member>?> getGroupMember(String groupId) async {
-    final myUid = Auth.auth.currentUser?.uid;
-    final snapshot = await groupRef.doc(groupId).collection('member').get();
-    List<Member>? memberList = [];
+  static Future<List<Users>?> getGroupMember(String groupId) async {
+    final snapshot = await userRef.get();
+    List<Users>? memberList = [];
     await Future.forEach(snapshot.docs, (dynamic doc) async {
-      if (doc.id == myUid) {
-        Member member = Member(
-          groupId: doc.data()['groupId'],
-          userName: doc.data()['userName'],
-        );
-        memberList.add(member);
-      }
+      Users member = Users(
+        name: doc.data()['name'],
+        imagePath: doc.data()['image_path'],
+        uid: doc.data()['uid'],
+      );
+      memberList.add(member);
     });
     return memberList;
   }
 
-//グループに入る
-  static Future<void> joinGroup(String groupId, String myUid) async {
-    groupRef.doc(groupId).update({
+  static Future<List<Message>?> getGroupMessages(String groupId) async {
+    final messageRef = groupRef.doc(groupId).collection('message');
+    List<Message>? messageList = [];
+    final snapshot = await messageRef.get();
+    await Future.forEach(snapshot.docs, (dynamic doc) {
+      bool isMe;
+      String? myUid = FirebaseAuth.instance.currentUser?.uid;
+      if (doc.data()['sender_id'] == myUid) {
+        isMe = true;
+      } else {
+        isMe = false;
+      }
+      Message message = Message(
+        message: doc.data()['message'],
+        image: doc.data()['image'],
+        isMe: isMe,
+        sendTime: doc.data()['send_time'],
+        messageId: doc.id,
+      );
+      messageList.add(message);
+    });
+    messageList.sort((a, b) => b.sendTime!.compareTo(a.sendTime!));
+    return messageList;
+  }
+
+//グループに参加する
+  static Future<List<Group>?> joinGroup(String groupId, String myUid) async {
+    final _name = userRef.doc(myUid).get().then((user) => user.data()!['name']);
+    final _image =
+        userRef.doc(myUid).get().then((user) => user.data()!['image_path']);
+    userRef.doc(myUid).get().then((user) => user.data()!['name']);
+
+    await groupRef.doc(groupId).update({
       'joined_user_id': FieldValue.arrayUnion([myUid])
     });
+    groupRef.doc(groupId).update({
+      'last_message': '参加しました',
+      'updated_time': Timestamp.now(),
+    });
+
+    // groupRef.doc(groupId).collection('member').doc(myUid).set({
+    //   'groupId': groupId,
+    //   'userName': _name,
+    //   'userImage': _image,
+    // });
+
+    //参加したら招待を表示しなくするため
+    await userRef.doc(myUid).collection('invitation').doc(groupId).delete();
   }
 
 //グループを抜ける
@@ -257,8 +353,37 @@ class Firestore {
     });
   }
 
+//招待されているグループを取得する
+  static Future<List<Group>?> getInvitation(String myUid) async {
+    final snapshot = await userRef.doc(myUid).collection('invitation').get();
+    List<Group>? invitedList = [];
+    await Future.forEach(snapshot.docs, (dynamic doc) {
+      Group invite = Group(
+        groupName: doc.data()['groupName'] ?? '',
+        groupImage: doc.data()['groupImage'] ?? '',
+        groupId: doc.data()['groupId'],
+      );
+      invitedList.add(invite);
+    });
+    return invitedList;
+  }
+
 //グループに招待する
-  static Future<void> inviteGroup() async {}
+  static Future<void> inviteGroup(String groupName, String groupImage,
+      String groupId, Users invitedUser) async {
+    final inviteRef = userRef.doc(invitedUser.uid).collection('invitation');
+    await inviteRef.doc(groupId).set({
+      'groupImage': groupImage,
+      'groupName': groupName,
+      'groupId': groupId,
+      'isInvited': true,
+    });
+
+    groupRef.doc(groupId).update({
+      'last_message': '${invitedUser.name}を招待しました',
+      'updated_time': Timestamp.now(),
+    });
+  }
 
   static Stream<QuerySnapshot>? messageSnapshot(String roomId) {
     return roomRef.doc(roomId).collection('message').snapshots();
@@ -270,6 +395,15 @@ class Firestore {
 
   static Stream<QuerySnapshot>? groupSnapshot() {
     return groupRef.snapshots();
+  }
+
+  static Stream<QuerySnapshot>? groupMessageSnapshot(String groupId) {
+    return groupRef.doc(groupId).collection('message').snapshots();
+  }
+
+  static Stream<QuerySnapshot>? invitedsnapshot() {
+    String? myUid = FirebaseAuth.instance.currentUser?.uid;
+    return userRef.doc(myUid).collection('invitation').snapshots();
   }
 }
 

@@ -6,6 +6,13 @@ class Message {
   bool? isMe;
   Timestamp? sendTime;
   String? messageId;
+  String? senderId;
 
-  Message({this.message, this.isMe, this.sendTime, this.image, this.messageId});
+  Message(
+      {this.message,
+      this.isMe,
+      this.sendTime,
+      this.image,
+      this.messageId,
+      this.senderId});
 }
