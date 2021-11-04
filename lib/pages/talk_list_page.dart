@@ -79,57 +79,60 @@ class _TalkListPageState extends State<TalkListPage> {
                                   builder: (context) =>
                                       TalkRoomPage(talkUserList?[index])));
                         },
-                        child: Container(
-                          height: 70,
-                          child: Row(
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 12.0),
-                                child: CircleAvatar(
-                                  backgroundImage: NetworkImage(
-                                      talkUserList![index]
-                                              .talkUser!
-                                              .imagePath ??
-                                          ''),
-                                  radius: 30,
-                                  backgroundColor: Colors.white,
-                                ),
-                              ),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Container(
-                                    width: 200,
-                                    child: Text(
-                                      talkUserList![index].talkUser!.name ??
-                                          'NoName',
-                                      style: TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold),
-                                    ),
+                        child: Padding(
+                          padding: const EdgeInsets.only(top: 10.0),
+                          child: Container(
+                            height: 70,
+                            child: Row(
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 12.0),
+                                  child: CircleAvatar(
+                                    backgroundImage: NetworkImage(
+                                        talkUserList![index]
+                                                .talkUser!
+                                                .imagePath ??
+                                            ''),
+                                    radius: 30,
+                                    backgroundColor: Colors.white,
                                   ),
-                                  Text(
-                                    talkUserList![index].lastMessage ?? '',
-                                    style: TextStyle(color: Colors.grey),
-                                  )
-                                ],
-                              ),
-                              SizedBox(
-                                width: 60,
-                              ),
-                              Container(
-                                width: 60,
-                                alignment: Alignment.center,
-                                child: Text(
-                                  talkUserList![index].lastMessage != ''
-                                      ? fromAtNow(lastMessageTime)
-                                      : '',
-                                  style: TextStyle(color: Colors.grey),
                                 ),
-                              )
-                            ],
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Container(
+                                      width: 200,
+                                      child: Text(
+                                        talkUserList![index].talkUser!.name ??
+                                            'NoName',
+                                        style: TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                    ),
+                                    Text(
+                                      talkUserList![index].lastMessage ?? '',
+                                      style: TextStyle(color: Colors.grey),
+                                    )
+                                  ],
+                                ),
+                                SizedBox(
+                                  width: 60,
+                                ),
+                                Container(
+                                  width: 60,
+                                  alignment: Alignment.center,
+                                  child: Text(
+                                    talkUserList![index].lastMessage != ''
+                                        ? fromAtNow(lastMessageTime)
+                                        : '',
+                                    style: TextStyle(color: Colors.grey),
+                                  ),
+                                )
+                              ],
+                            ),
                           ),
                         ),
                       );

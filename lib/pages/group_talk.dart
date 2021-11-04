@@ -1,9 +1,7 @@
 import 'dart:io';
 
 import 'package:chat_app/model/group.dart';
-import 'package:chat_app/model/member.dart';
 import 'package:chat_app/model/message.dart';
-import 'package:chat_app/model/user.dart';
 import 'package:chat_app/pages/send_image_display.dart';
 import 'package:chat_app/utils/firebase.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';

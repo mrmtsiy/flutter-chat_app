@@ -153,57 +153,61 @@ class _GroupPageState extends State<GroupPage> {
                                 },
                               ),
                             ],
-                            child: Container(
-                              height: 70,
-                              child: Row(
-                                children: [
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 12.0),
-                                    child: CircleAvatar(
-                                      backgroundImage: NetworkImage(groupList![
-                                                  index]
-                                              .groupImage ??
-                                          'https://www.silhouette-illust.com/wp-content/uploads/2016/10/13707-300x300.jpg'),
-                                      radius: 30,
-                                      backgroundColor: Colors.white,
-                                    ),
-                                  ),
-                                  Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Container(
-                                        width: 200,
-                                        child: Text(
-                                          groupList![index].groupName ??
-                                              'NoName',
-                                          style: TextStyle(
-                                              fontSize: 18,
-                                              fontWeight: FontWeight.bold),
-                                        ),
+                            child: Padding(
+                              padding: const EdgeInsets.only(top: 10.0),
+                              child: Container(
+                                height: 70,
+                                child: Row(
+                                  children: [
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 12.0),
+                                      child: CircleAvatar(
+                                        backgroundImage: NetworkImage(groupList![
+                                                    index]
+                                                .groupImage ??
+                                            'https://www.silhouette-illust.com/wp-content/uploads/2016/10/13707-300x300.jpg'),
+                                        radius: 30,
+                                        backgroundColor: Colors.white,
                                       ),
-                                      Text(
-                                        groupList![index].lastMessage ?? '',
-                                        style: TextStyle(color: Colors.grey),
-                                      )
-                                    ],
-                                  ),
-                                  SizedBox(
-                                    width: 60,
-                                  ),
-                                  Container(
-                                    width: 60,
-                                    alignment: Alignment.center,
-                                    child: Text(
-                                      groupList![index].lastMessage != ''
-                                          ? fromAtNow(lastMessageTime)
-                                          : '',
-                                      style: TextStyle(color: Colors.grey),
                                     ),
-                                  )
-                                ],
+                                    Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Container(
+                                          width: 200,
+                                          child: Text(
+                                            groupList![index].groupName ??
+                                                'NoName',
+                                            style: TextStyle(
+                                                fontSize: 18,
+                                                fontWeight: FontWeight.bold),
+                                          ),
+                                        ),
+                                        Text(
+                                          groupList![index].lastMessage ?? '',
+                                          style: TextStyle(color: Colors.grey),
+                                        )
+                                      ],
+                                    ),
+                                    SizedBox(
+                                      width: 60,
+                                    ),
+                                    Container(
+                                      width: 60,
+                                      alignment: Alignment.center,
+                                      child: Text(
+                                        groupList![index].lastMessage != ''
+                                            ? fromAtNow(lastMessageTime)
+                                            : '',
+                                        style: TextStyle(color: Colors.grey),
+                                      ),
+                                    )
+                                  ],
+                                ),
                               ),
                             ),
                           ),
