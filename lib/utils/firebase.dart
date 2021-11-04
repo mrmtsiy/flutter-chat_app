@@ -1,5 +1,4 @@
 import 'package:chat_app/model/group.dart';
-import 'package:chat_app/model/member.dart';
 import 'package:chat_app/model/message.dart';
 import 'package:chat_app/model/talk_room.dart';
 import 'package:chat_app/model/user.dart';
@@ -323,7 +322,9 @@ class Firestore {
 
 //グループに参加する
   static Future<List<Group>?> joinGroup(String groupId, String myUid) async {
+    // ignore: unused_local_variable
     final _name = userRef.doc(myUid).get().then((user) => user.data()!['name']);
+    // ignore: unused_local_variable
     final _image =
         userRef.doc(myUid).get().then((user) => user.data()!['image_path']);
     userRef.doc(myUid).get().then((user) => user.data()!['name']);

@@ -25,7 +25,6 @@ class _TopPageState extends State<TopPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('ユーザーリスト'),
-        actions: [IconButton(onPressed: () {}, icon: Icon(Icons.search))],
         leading: IconButton(
           onPressed: () {
             Navigator.push(
@@ -142,43 +141,46 @@ class _TopPageState extends State<TopPage> {
                             },
                           );
                         },
-                        child: Container(
-                          height: 70,
-                          child: Row(
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 12.0),
-                                child: CircleAvatar(
-                                  backgroundImage: NetworkImage(
-                                      talkUserList![index]
-                                              .talkUser!
-                                              .imagePath ??
-                                          ''),
-                                  radius: 30,
-                                  backgroundColor: Colors.white,
-                                ),
-                              ),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Container(
-                                    width: 200,
-                                    child: Text(
-                                      talkUserList![index].talkUser!.name ??
-                                          'NoName',
-                                      style: TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold),
-                                    ),
+                        child: Padding(
+                          padding: const EdgeInsets.only(top: 10.0),
+                          child: Container(
+                            height: 70,
+                            child: Row(
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 12.0),
+                                  child: CircleAvatar(
+                                    backgroundImage: NetworkImage(
+                                        talkUserList![index]
+                                                .talkUser!
+                                                .imagePath ??
+                                            ''),
+                                    radius: 30,
+                                    backgroundColor: Colors.white,
                                   ),
-                                ],
-                              ),
-                              SizedBox(
-                                width: 60,
-                              ),
-                            ],
+                                ),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Container(
+                                      width: 200,
+                                      child: Text(
+                                        talkUserList![index].talkUser!.name ??
+                                            'NoName',
+                                        style: TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(
+                                  width: 60,
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       );
