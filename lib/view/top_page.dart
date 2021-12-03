@@ -1,7 +1,7 @@
 import 'package:chat_app/model/talk_room.dart';
-import 'package:chat_app/pages/current_user_profile_page.dart';
-import 'package:chat_app/pages/profile_image_page.dart';
-import 'package:chat_app/pages/talk_room.dart';
+import 'package:chat_app/view/current_user_profile_page.dart';
+import 'package:chat_app/view/profile_image_page.dart';
+import 'package:chat_app/view/talk_room.dart';
 import 'package:chat_app/utils/firebase.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';

@@ -1,5 +1,5 @@
-import 'package:chat_app/pages/register.dart';
-import 'package:chat_app/pages/route.dart';
+import 'package:chat_app/view/register.dart';
+import 'package:chat_app/view/route.dart';
 import 'package:chat_app/utils/authentication_error.dart';
 import 'package:chat_app/utils/firebase.dart';
 import 'package:firebase_auth/firebase_auth.dart';

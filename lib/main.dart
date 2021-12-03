@@ -1,17 +1,22 @@
-import 'package:chat_app/pages/login.dart';
-import 'package:chat_app/pages/route.dart';
+import 'package:chat_app/view/login.dart';
+import 'package:chat_app/view/route.dart';
 import 'package:chat_app/utils/firebase.dart';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   // await SharedPrefs.setInstance();
   // checkAccount();
-  runApp(MyApp());
+  runApp(
+    ProviderScope(
+      child: MyApp(),
+    ),
+  );
 }
 
 Future<void> checkAccount() async {

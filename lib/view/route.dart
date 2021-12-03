@@ -1,6 +1,6 @@
-import 'package:chat_app/pages/group_page.dart';
-import 'package:chat_app/pages/talk_list_page.dart';
-import 'package:chat_app/pages/top_page.dart';
+import 'package:chat_app/view/group_page.dart';
+import 'package:chat_app/view/talk_list_page.dart';
+import 'package:chat_app/view/top_page.dart';
 
 import 'package:flutter/material.dart';
 

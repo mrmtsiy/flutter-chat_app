@@ -1,8 +1,8 @@
 import 'package:chat_app/model/group.dart';
-import 'package:chat_app/pages/group_create_page.dart';
-import 'package:chat_app/pages/group_talk.dart';
-import 'package:chat_app/pages/invite_page.dart';
-import 'package:chat_app/pages/invited_page.dart';
+import 'package:chat_app/view/group_create_page.dart';
+import 'package:chat_app/view/group_talk.dart';
+import 'package:chat_app/view/invite_page.dart';
+import 'package:chat_app/view/invited_page.dart';
 import 'package:chat_app/utils/firebase.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
