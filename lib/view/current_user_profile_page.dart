@@ -1,7 +1,7 @@
 import 'dart:io';
 
-import 'package:chat_app/pages/login.dart';
-import 'package:chat_app/pages/settings_profile.dart';
+import 'package:chat_app/view/login.dart';
+import 'package:chat_app/view/settings_profile.dart';
 import 'package:chat_app/utils/firebase.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -151,7 +151,6 @@ class _CurrentUserProfilePageState extends State<CurrentUserProfilePage> {
                                 Auth.name, Auth.profileImage)));
                         await Auth.fetchUser(myUid);
                         setState(() {});
-                        print(Auth.name);
                       },
                       child: Text('編集する'),
                     )

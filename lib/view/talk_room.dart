@@ -1,8 +1,8 @@
 import 'dart:io';
 
-import 'package:chat_app/model/group.dart';
 import 'package:chat_app/model/message.dart';
-import 'package:chat_app/pages/send_image_display.dart';
+import 'package:chat_app/model/talk_room.dart';
+import 'package:chat_app/view/send_image_display.dart';
 import 'package:chat_app/utils/firebase.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -11,18 +11,17 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart' as intl;
 
-class GroupTalkPage extends StatefulWidget {
-  final Group? group;
-  GroupTalkPage(this.group);
+class TalkRoomPage extends StatefulWidget {
+  final TalkRoom? room;
+  TalkRoomPage(this.room);
 
   @override
-  _GroupTalkPageState createState() => _GroupTalkPageState();
+  _TalkRoomPageState createState() => _TalkRoomPageState();
 }
 
-class _GroupTalkPageState extends State<GroupTalkPage> {
+class _TalkRoomPageState extends State<TalkRoomPage> {
   bool isLoading = false;
   List<Message>? messageList = [];
-
   TextEditingController controller = TextEditingController();
   bool confirmImage = true;
 
@@ -52,31 +51,26 @@ class _GroupTalkPageState extends State<GroupTalkPage> {
     return downloadUrl;
   }
 
-  Future<void> getGroupMessages() async {
-    messageList = await Firestore.getGroupMessages(widget.group!.groupId!);
+  Future<void> getMessages() async {
+    messageList = await Firestore.getMessages(widget.room!.roomId!);
   }
-
-  // Future<List<Member>?> getGroupMembers() async {
-  //   memberList = await Firestore.getGroupMember(widget.group!.groupId!);
-  // }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.lightBlue[100],
       appBar: AppBar(
-        title: Text(
-            '${widget.group!.groupName!} (${widget.group!.member?.length}人)'),
+        title: Text(widget.room!.talkUser!.name ?? 'Noname'),
       ),
       body: Stack(
         children: [
           Padding(
             padding: const EdgeInsets.only(bottom: 70.0),
             child: StreamBuilder<QuerySnapshot>(
-                stream: Firestore.groupMessageSnapshot(widget.group!.groupId!),
+                stream: Firestore.messageSnapshot(widget.room!.roomId!),
                 builder: (context, snapshot) {
                   return FutureBuilder(
-                      future: getGroupMessages(),
+                      future: getMessages(),
                       builder: (context, snapshot) {
                         return ListView.builder(
                             reverse: true,
@@ -103,6 +97,13 @@ class _GroupTalkPageState extends State<GroupTalkPage> {
                                         : Padding(
                                             padding: const EdgeInsets.symmetric(
                                                 horizontal: 8.0),
+                                            child: CircleAvatar(
+                                              backgroundImage: NetworkImage(
+                                                  widget.room!.talkUser!
+                                                      .imagePath!),
+                                              radius: 20,
+                                              backgroundColor: Colors.white,
+                                            ),
                                           ),
                                     // 投稿を長押しした時にアラートを出す
                                     GestureDetector(
@@ -123,9 +124,9 @@ class _GroupTalkPageState extends State<GroupTalkPage> {
                                                     Navigator.pop(childContext);
                                                     try {
                                                       await Firestore
-                                                          .deleteGroupMessage(
-                                                              widget.group!
-                                                                  .groupId!,
+                                                          .deleteMessage(
+                                                              widget.room!
+                                                                  .roomId!,
                                                               messageList![
                                                                       index]
                                                                   .messageId!);
@@ -220,8 +221,8 @@ class _GroupTalkPageState extends State<GroupTalkPage> {
                           setState(() {});
                           try {
                             await getImageFromGallery();
-                            await Firestore.sendGroupImage(
-                                widget.group!.groupId!, imagePath!);
+                            await Firestore.sendImage(
+                                widget.room!.roomId!, imagePath!);
                           } catch (e) {} finally {
                             Firestore.endloading();
                             setState(() {});
@@ -245,8 +246,8 @@ class _GroupTalkPageState extends State<GroupTalkPage> {
                       if (controller.text.isNotEmpty) {
                         final String? myUid =
                             FirebaseAuth.instance.currentUser!.uid;
-                        await Firestore.sendGroupMessage(
-                            widget.group!.groupId!, controller.text);
+                        await Firestore.sendMessage(
+                            widget.room!.roomId!, controller.text);
                         Firestore.getProfile(myUid!);
                         controller.clear();
                       }

@@ -1,4 +1,4 @@
-import 'package:chat_app/pages/login.dart';
+import 'package:chat_app/view/login.dart';
 import 'package:chat_app/utils/authentication_error.dart';
 import 'package:chat_app/utils/firebase.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
